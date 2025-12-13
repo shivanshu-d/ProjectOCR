@@ -1,0 +1,21 @@
+# Core Python
+numpy>=1.23
+opencv-python>=4.8
+Pandas
+
+# OCR Engines
+easyocr>=1.7.1
+pytesseract>=0.3.10
+
+# Deep Learning Backend (required by EasyOCR)
+torch>=2.0
+torchvision>=0.15
+
+# Web App Framework
+streamlit>=1.30
+
+# Image Processing & Utilities
+Pillow>=9.5
+
+# Data Handling
+python-dateutil>=2.8
