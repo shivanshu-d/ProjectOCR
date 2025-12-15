@@ -11,21 +11,12 @@ def save_result_bundle(
     visual_image_rgb,
     confidence: float = None,
 ):
-    """
-    Save extraction results and OCR visualization.
-
-    Output structure:
-    results/
-      <image_name_without_ext>/
-        ├── result.json
-        └── ocr_visual.png
-    """
+   
 
     base_name = Path(image_name).stem
     out_dir = Path("results") / base_name
     out_dir.mkdir(parents=True, exist_ok=True)
 
-    # ---------------- Save JSON ----------------
     result_json = {
         "image": image_name,
         "extracted_id": extracted_id,
@@ -40,9 +31,7 @@ def save_result_bundle(
     with open(json_path, "w", encoding="utf-8") as f:
         json.dump(result_json, f, indent=2)
 
-    # ---------------- Save Image ----------------
     img_path = out_dir / "ocr_visual.png"
-    # visual_image_rgb is RGB → convert to BGR for OpenCV
     cv2.imwrite(str(img_path), cv2.cvtColor(visual_image_rgb, cv2.COLOR_RGB2BGR))
 
     return json_path, img_path
