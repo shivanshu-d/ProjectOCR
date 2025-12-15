@@ -1,23 +1,3 @@
-# app.py
-"""
-Streamlit app for OCR-based `_1_` ID extraction.
-Usage:
-    streamlit run app.py
-
-Requirements (from your repo):
-    - src/preprocessing.py  (Preprocessor)
-    - src/ocr_engine.py     (OCREngine)
-    - src/text_extraction.py (TextExtractor)
-
-The app lets you:
- - Upload an image (or pick a sample)
- - Configure basic preprocessing toggles
- - Choose OCR engine (easyocr / tesseract / auto)
- - Run OCR and extract the `_1_` ID token
- - Visualize OCR bounding boxes and highlight the extracted token
- - Download JSON result for the image
-"""
-
 import json
 import io
 from pathlib import Path
@@ -27,24 +7,17 @@ import streamlit as st
 import numpy as np
 import cv2
 from src.utils_results import save_result_bundle
-
-# Ensure project src is importable
 import sys
 sys.path.append(".")
 
-# Import your modules
 from src.preprocessing import Preprocessor
 from src.ocr_engine import OCREngine
 from src.text_extraction import TextExtractor
 
-# ---------- Helpers ----------
 def draw_bboxes_on_image(img: np.ndarray, ocr_results: List[Dict[str, Any]], highlight_token: str = None) -> np.ndarray:
-    """
-    Draw bounding boxes on a BGR image. Highlight the box(es) containing highlight_token.
-    Returns an RGB image ready for st.image (Streamlit expects RGB).
-    """
+    
     out = img.copy()
-    # If grayscale convert to BGR
+    
     if len(out.shape) == 2:
         out = cv2.cvtColor(out, cv2.COLOR_GRAY2BGR)
 
@@ -59,13 +32,13 @@ def draw_bboxes_on_image(img: np.ndarray, ocr_results: List[Dict[str, Any]], hig
             x1, y1 = min(x_coords), min(y_coords)
             x2, y2 = max(x_coords), max(y_coords)
 
-            # Choose color: highlight if token contains highlight_token, else green
-            color = (0, 255, 0)  # green in BGR
+           
+            color = (0, 255, 0) 
             if highlight_token:
-                # compare normalized token
+            
                 norm_text = text.replace(" ", "").replace("-", "_")
                 if highlight_token.replace(" ", "").replace("-", "_") in norm_text:
-                    color = (0, 120, 255)  # orange-ish (BGR)
+                    color = (0, 120, 255)  
                     thickness = 3
                 else:
                     thickness = 1
@@ -76,10 +49,10 @@ def draw_bboxes_on_image(img: np.ndarray, ocr_results: List[Dict[str, Any]], hig
             label = text if len(text) < 30 else text[:27] + "..."
             cv2.putText(out, label, (x1, max(10, y1-6)), cv2.FONT_HERSHEY_SIMPLEX, 0.45, color, 1, cv2.LINE_AA)
         except Exception:
-            # ignore malformed bbox
+           
             continue
 
-    # Convert BGR->RGB for display
+  
     return cv2.cvtColor(out, cv2.COLOR_BGR2RGB)
 
 
@@ -92,7 +65,7 @@ def ocr_results_confidence_for_token(ocr_results, extracted_token):
     if not extracted_token:
         return 0.0
 
-    # Split token into prefix, middle, suffix
+    
     parts = extracted_token.split("_")
     parts = [p.strip().lower() for p in parts if p.strip()]
 
@@ -110,7 +83,6 @@ def ocr_results_confidence_for_token(ocr_results, extracted_token):
         except:
             continue
 
-        # check if token contains any part (prefix or suffix)
         for p in parts:
             if p and p in t:
                 confidences.append(conf)
@@ -191,14 +163,13 @@ extractor = TextExtractor(y_threshold=25)
 # Run pipeline button
 if st.button("Run OCR & Extract ID"):
     with st.spinner("Running preprocessing..."):
-        # Many versions of Preprocessor expose either run() or run_pipeline()
+        
         try:
             processed = pre.run(image)
         except Exception:
             processed = pre.run_pipeline(image)
 
     st.subheader("Processed Image")
-    # If processed is single-channel, show with cmap
     if len(processed.shape) == 2:
         st.image(processed, clamp=True, channels="GRAY", use_column_width=True)
     else:
@@ -298,14 +269,7 @@ if st.button("Run OCR & Extract ID"):
 
     st.download_button("Download JSON result", data=out_json, file_name=f"{Path(image_name).stem}_ocr_result.json", mime="application/json")
 
-    # Save to results/ folder optionally
-    # if st.checkbox("Save result to results/ folder", value=False):
-    #     results_dir = Path("results")
-    #     results_dir.mkdir(parents=True, exist_ok=True)
-    #     save_path = results_dir / f"{Path(image_name).stem}_ocr_result.json"
-    #     with open(save_path, "w", encoding="utf-8") as f:
-    #         f.write(out_json)
-    #     st.write(f"Saved: {save_path}")
+   
 
 # Footer
 st.markdown("---")
